@@ -1,0 +1,47 @@
+{
+  "name": "babel-plugin-reanimated-coverage-skip",
+  "version": "1.0.0",
+  "description": "Babel plugin to skip coverage for React Native Reanimated worklet functions",
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/babel-plugin-reanimated-coverage-skip.git"
+  },
+  "keywords": [
+    "babel",
+    "plugin",
+    "reanimated",
+    "worklet",
+    "coverage",
+    "react-native"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "babel src --out-dir lib",
+    "test": "mocha test/**/*.js",
+    "prepublishOnly": "npm run build",
+    "lint": "standard",
+    "lint:fix": "standard --fix"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.23.0",
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "chai": "^4.3.0",
+    "mocha": "^10.2.0",
+    "standard": "^17.1.0"
+  },
+  "dependencies": {
+    "@babel/helper-plugin-utils": "^7.22.0"
+  },
+  "peerDependencies": {
+    "@babel/core": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
