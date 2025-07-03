@@ -3,79 +3,55 @@ import { NodePath, PluginObj } from "@babel/core";
 import * as t from "@babel/types";
 
 /**
- * Check if a file imports react-native-reanimated
+ * Check if a file imports react-native-reanimated hooks
  */
 function hasReanimatedImport(programPath: NodePath<t.Program>): boolean {
-  let hasImport = false;
+  let foundReanimated = false;
 
   programPath.traverse({
-    ImportDeclaration(path) {
-      const source = path.node.source.value;
-      if (
-        source === "react-native-reanimated" ||
-        source.includes("reanimated")
-      ) {
-        hasImport = true;
-        path.stop();
-      }
-    },
-    CallExpression(path) {
-      // Check for require('react-native-reanimated')
-      if (
-        path.node.callee.type === "Identifier" &&
-        path.node.callee.name === "require" &&
-        path.node.arguments.length === 1 &&
-        path.node.arguments[0].type === "StringLiteral"
-      ) {
-        const moduleName = path.node.arguments[0].value;
-        if (
-          moduleName === "react-native-reanimated" ||
-          moduleName.includes("reanimated")
-        ) {
-          hasImport = true;
-          path.stop();
+    ImportDeclaration(importPath) {
+      if (importPath.node.source.value === "react-native-reanimated") {
+        // Check if any imported specifier starts with "use"
+        const hasUseHook = importPath.node.specifiers.some((specifier) => {
+          return (
+            specifier.type === "ImportSpecifier" &&
+            specifier.imported.type === "Identifier" &&
+            specifier.imported.name.startsWith("use")
+          );
+        });
+
+        if (hasUseHook) {
+          foundReanimated = true;
+          importPath.stop();
         }
       }
     },
   });
 
-  return hasImport;
-}
-
-/**
- * Check if a function contains worklet directive
- */
-function isWorkletFunction(functionPath: NodePath<t.Function>): boolean {
-  const body = functionPath.node.body;
-  if (!body || body.type !== "BlockStatement" || !body.body) {
-    return false;
-  }
-
-  // Check for 'worklet' directive at the beginning of function body
-  return body.body.some(
-    (statement) =>
-      statement.type === "ExpressionStatement" &&
-      statement.expression.type === "StringLiteral" &&
-      statement.expression.value === "worklet"
-  );
+  return foundReanimated;
 }
 
 /**
  * Check if the file contains any worklet functions
  */
 function hasWorkletFunctions(programPath: NodePath<t.Program>): boolean {
-  let hasWorklet = false;
+  let foundWorklet = false;
 
   programPath.traverse({
-    "FunctionDeclaration|FunctionExpression|ArrowFunctionExpression"(path) {
-      if (isWorkletFunction(path as NodePath<t.Function>)) {
-        hasWorklet = true;
-        path.stop();
+    BlockStatement(blockPath) {
+      if (
+        blockPath.node.directives &&
+        blockPath.node.directives.some(
+          (directive) => directive.value.value === "worklet"
+        )
+      ) {
+        foundWorklet = true;
+        blockPath.stop();
       }
     },
   });
 
-  return hasWorklet;
+  return foundWorklet;
 }
 
 export default declare((api): PluginObj => {
