@@ -21,19 +21,20 @@
     "lib"
   ],
   "scripts": {
-    "build": "babel src --out-dir lib",
+    "build": "tsc",
     "test": "mocha test/**/*.js",
     "prepublishOnly": "npm run build",
-    "lint": "standard",
-    "lint:fix": "standard --fix"
+    "clean": "rm -rf lib"
   },
   "devDependencies": {
-    "@babel/cli": "^7.23.0",
     "@babel/core": "^7.23.0",
-    "@babel/preset-env": "^7.23.0",
+    "@babel/types": "^7.23.0",
+    "@types/babel__core": "^7.20.3",
+    "@types/babel__helper-plugin-utils": "^7.10.3",
+    "@types/node": "^20.0.0",
     "chai": "^4.3.0",
     "mocha": "^10.2.0",
-    "standard": "^17.1.0"
+    "typescript": "^5.0.0"
   },
   "dependencies": {
     "@babel/helper-plugin-utils": "^7.22.0"
