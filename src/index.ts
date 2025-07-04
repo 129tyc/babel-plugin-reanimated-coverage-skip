@@ -1,6 +1,7 @@
 import { declare } from "@babel/helper-plugin-utils";
 import { NodePath, PluginObj } from "@babel/core";
 import * as t from "@babel/types";
+import TestExclude from "test-exclude";
 
 /**
  * Check if a file imports react-native-reanimated hooks
@@ -54,14 +55,37 @@ function hasWorkletFunctions(programPath: NodePath<t.Program>): boolean {
   return foundWorklet;
 }
 
-export default declare((api): PluginObj => {
+interface PluginOptions {
+  cwd?: string;
+  include?: string[];
+  exclude?: string[];
+  extension?: string[];
+  excludeNodeModules?: boolean;
+}
+
+export default declare((api, options: PluginOptions = {}): PluginObj => {
   api.assertVersion(7);
+
+  // Create TestExclude instance
+  const testExclude = new TestExclude({
+    cwd: options.cwd || process.cwd(),
+    include: options.include,
+    exclude: options.exclude,
+    extension: options.extension,
+    excludeNodeModules: options.excludeNodeModules !== false,
+  });
 
   return {
     name: "reanimated-coverage-skip",
     visitor: {
       Program: {
         enter(path) {
+          // Check if file should be excluded
+          const filename = this.file.opts.filename;
+          if (filename && !testExclude.shouldInstrument(filename)) {
+            return;
+          }
+
           // Check for programmatic skip coverage markers set by other plugins
           if ((path.node as any)._skipCoverage) {
             return;
